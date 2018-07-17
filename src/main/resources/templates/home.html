@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8"/>
+    <title>Blogsproject mainpage</title>
+    <script type="text/javascript" src="webjars/jquery/3.2.1/dist/jquery.min.js"></script>
+    <link rel="stylesheet" th:href="@{/css/main.css}" href="../../static/css/main.css"/>
+	<script th:src="@{/js/app.js}"></script>
+    <div th:replace="fragments/header :: header-css"/>
+
+</head>
+<body>
+
+<div th:replace="fragments/header :: header"/>
+
+<div th:if="${nameError != null}"  class="alert alert-danger">
+	<p th:text="#{dashboard.nameError}"></p>
+</div>
+<div th:if="${personDeleteSuccess != null}"  class="alert alert-success">
+	<p th:text="#{dashboard.personDeleteSuccess}"></p>
+</div>
+<div th:if="${houseworkDeleteSuccess != null}"  class="alert alert-success">
+	<p th:text="#{dashboard.houseworkDeleteSuccess}"></p>
+</div>
+<div th:if="${houseworkError != null}"  class="alert alert-danger">
+	<p th:text="#{dashboard.houseworkError}"></p>
+</div>
+<div th:if="${personhouseworkError != null}"  class="alert alert-danger">
+	<p th:text="#{dashboard.personhouseworkError}"></p>
+</div>
+<div th:if="${nameSuccess != null}"  class="alert alert-success">
+	<p th:text="#{dashboard.nameSuccess}"></p>
+</div>
+<div th:if="${houseworkSuccess != null}"  class="alert alert-success">
+	<p th:text="#{dashboard.houseworkSuccess}"></p>
+</div>
+<div th:id="personhouseworkSuccess" class="alert alert-success collapse" >
+    <p th:text="#{dashboard.personhouseworkSuccess}"></p>
+</div>
+<div th:id="personAddPlayinghoursSuccess"   class="alert alert-success collapse">
+	<p  th:text="#{dashboard.personAddPlayinghoursSuccess}"></p>
+</div>
+<div th:id="changeHouseworkSuccess"   class="alert alert-success collapse">
+	<p  th:text="#{dashboard.changeHouseworkSuccess}"></p>
+</div>
+
+
+
+<div class="container">
+    <div class="starter-template">
+    	<main id="posts">
+		    <article th:each="p : ${posts}">
+		      <h2 class="title" th:text="${p.title}">Post Title</h2>
+		      <div class="date">
+		        <i>Posted on</i>
+		        <span th:text="${p.date}">Date</span>
+		        <span th:if="${p.userId}" th:remove="tag">
+		          <i>by</i>
+		          <span th:text="${p.userName}">Username</span>
+		        </span>
+		      </div>
+		      <p class="content" th:utext="${p.body}">Post body</p>
+		    </article>
+		</main>
+   
+        
+    </div>
+
+</div>
+
+
+<!-- /.container -->
+
+<div th:replace="fragments/footer :: footer"/>
+
+</body>
+</html>

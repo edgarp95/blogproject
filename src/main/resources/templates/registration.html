@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Register</title>
+</head>
+
+<body>
+
+<div class="container">
+
+    <form method="POST" th:object="${userForm}"  th:action="@{/registration}">
+        <h2 class="form-signin-heading">Create your account</h2>
+            <div>
+                <input  type="text" path="username" class="form-control" placeholder="Username"
+                            autofocus="true" th:field="*{username}"/>
+            </div>
+
+
+       
+            <div >
+                <input type="password" path="password" class="form-control" placeholder="Password" th:field="*{password}"/>
+           
+            </div>
+
+            <div>
+                <input type="password" path="passwordConfirm" class="form-control"
+                            placeholder="Confirm your password" th:field="*{passwordConfirm}"/>
+            
+            </div>
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+    </form>
+
+</div>
+
+</body>
+</html>
