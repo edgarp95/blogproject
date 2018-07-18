@@ -1,97 +1,106 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-	<meta charset="UTF-8"/>
-    <title>Blogsproject mainpage</title>
-    <script type="text/javascript" src="webjars/jquery/3.2.1/dist/jquery.min.js"></script>
-    <link rel="stylesheet" th:href="@{/css/main.css}" href="../../static/css/main.css"/>
-	<script th:src="@{/js/app.js}"></script>
-    <div th:replace="fragments/header :: header-css"/>
+<meta charset="UTF-8" />
+<title>Blogsproject mainpage</title>
+<script type="text/javascript"
+	src="webjars/jquery/3.2.1/dist/jquery.min.js"></script>
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../../static/css/main.css" />
+<script th:src="@{/js/app.js}"></script>
+<div th:replace="fragments/header :: header-css" />
 
 </head>
 <body>
 
-<div th:replace="fragments/header :: header"/>
+	<div th:replace="fragments/header :: header" />
 
-<div th:if="${nameError != null}"  class="alert alert-danger">
-	<p th:text="#{dashboard.nameError}"></p>
-</div>
-<div th:if="${personDeleteSuccess != null}"  class="alert alert-success">
-	<p th:text="#{dashboard.personDeleteSuccess}"></p>
-</div>
-<div th:if="${houseworkDeleteSuccess != null}"  class="alert alert-success">
-	<p th:text="#{dashboard.houseworkDeleteSuccess}"></p>
-</div>
-<div th:if="${houseworkError != null}"  class="alert alert-danger">
-	<p th:text="#{dashboard.houseworkError}"></p>
-</div>
-<div th:if="${personhouseworkError != null}"  class="alert alert-danger">
-	<p th:text="#{dashboard.personhouseworkError}"></p>
-</div>
-<div th:if="${nameSuccess != null}"  class="alert alert-success">
-	<p th:text="#{dashboard.nameSuccess}"></p>
-</div>
-<div th:if="${houseworkSuccess != null}"  class="alert alert-success">
-	<p th:text="#{dashboard.houseworkSuccess}"></p>
-</div>
-<div th:id="personhouseworkSuccess" class="alert alert-success collapse" >
-    <p th:text="#{dashboard.personhouseworkSuccess}"></p>
-</div>
-<div th:id="personAddPlayinghoursSuccess"   class="alert alert-success collapse">
-	<p  th:text="#{dashboard.personAddPlayinghoursSuccess}"></p>
-</div>
-<div th:id="changeHouseworkSuccess"   class="alert alert-success collapse">
-	<p  th:text="#{dashboard.changeHouseworkSuccess}"></p>
-</div>
+	<div th:if="${nameError != null}" class="alert alert-danger">
+		<p th:text="#{dashboard.nameError}"></p>
+	</div>
+	<div th:if="${personDeleteSuccess != null}" class="alert alert-success">
+		<p th:text="#{dashboard.personDeleteSuccess}"></p>
+	</div>
+	<div th:if="${houseworkDeleteSuccess != null}"
+		class="alert alert-success">
+		<p th:text="#{dashboard.houseworkDeleteSuccess}"></p>
+	</div>
+	<div th:if="${houseworkError != null}" class="alert alert-danger">
+		<p th:text="#{dashboard.houseworkError}"></p>
+	</div>
+	<div th:if="${personhouseworkError != null}" class="alert alert-danger">
+		<p th:text="#{dashboard.personhouseworkError}"></p>
+	</div>
+	<div th:if="${nameSuccess != null}" class="alert alert-success">
+		<p th:text="#{dashboard.nameSuccess}"></p>
+	</div>
+	<div th:if="${houseworkSuccess != null}" class="alert alert-success">
+		<p th:text="#{dashboard.houseworkSuccess}"></p>
+	</div>
+	<div th:id="personhouseworkSuccess"
+		class="alert alert-success collapse">
+		<p th:text="#{dashboard.personhouseworkSuccess}"></p>
+	</div>
+	<div th:id="personAddPlayinghoursSuccess"
+		class="alert alert-success collapse">
+		<p th:text="#{dashboard.personAddPlayinghoursSuccess}"></p>
+	</div>
 
 
 
-<div class="container" id="blogbody">
-    <div class="starter-template">
-    	<div class="row">
-		  <div class="leftcolumn">
-		    <div class="card" th:each="p : ${posts}">
-		      <h2 th:text="${p.title}">Title</h2>
-		      <h5><span>Posted on </span><span th:text="${p.date}">Date</span><i> by </i><span th:text="${p.userName}">Username</span>
-		       <br/>
-		      <span th:if="${user != null and user.username == p.userName}"><a  th:onclick="'deletePostPre(' + ${p.id} + ')'"  data-toggle="modal" href="#deletePost">Delete</a> | <a href="">Change</a></span></h5>
-		     
-		      <div class="fakeimg" style="height:200px;">Image</div>
-		      <p class="content" th:utext="${p.body}">Post body</p>
-		    </div>
-		  
-		  </div>
- 
-		</div>       
-    </div>
 
-</div>
+	<div class="container" id="blogbody">
+		<div class="starter-template">
+			<div class="row">
+				<div class="leftcolumn">
+					<div class="card" th:each="p : ${posts}">
+						<h2 th:text="${p.title}">Title</h2>
+						<h5>
+							<span>Posted on </span><span th:text="${p.date}">Date</span><i>
+								by </i><span th:text="${p.userName}">Username</span> <br /> <span
+								th:if="${user != null and user.username == p.userName}"><a
+								th:onclick="'deletePostPre(' + ${p.id} + ')'"
+								data-toggle="modal" href="#deletePost">Delete</a> | <a href="">Change</a></span>
+						</h5>
 
-<!-- Person delete modal -->
-<div class="modal" tabindex="-1" role="dialog" id="deletePost">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Delete confirmation</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete post?</p>
-      </div>
-      <div class="modal-footer">
-      	<a  id = "deletePostUrl">
-       		<button type="button" class="btn btn-primary" >Delete</button>
-       		</a>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- /.container -->
+						<div class="fakeimg" style="height: 200px;">Image</div>
+						<p class="content" th:utext="${p.body}">Post body</p>
+					</div>
 
-<div th:replace="fragments/footer :: footer"/>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
+	<!-- Person delete modal -->
+	<div class="modal" tabindex="-1" role="dialog" id="deletePost">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Delete confirmation</h5>
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to delete post?</p>
+				</div>
+				<div class="modal-footer">
+					<a id="deletePostUrl">
+						<button type="button" class="btn btn-primary">Delete</button>
+					</a>
+					<button type="button" class="btn btn-secondary"
+						data-dismiss="modal">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- /.container -->
+
+	<div th:replace="fragments/footer :: footer" />
 
 </body>
 </html>
