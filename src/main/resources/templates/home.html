@@ -46,29 +46,49 @@
 
 
 
-<div class="container">
+<div class="container" id="blogbody">
     <div class="starter-template">
-    	<main id="posts">
-		    <article th:each="p : ${posts}">
-		      <h2 class="title" th:text="${p.title}">Post Title</h2>
-		      <div class="date">
-		        <i>Posted on</i>
-		        <span th:text="${p.date}">Date</span>
-		        <span th:if="${p.userId}" th:remove="tag">
-		          <i>by</i>
-		          <span th:text="${p.userName}">Username</span>
-		        </span>
-		      </div>
+    	<div class="row">
+		  <div class="leftcolumn">
+		    <div class="card" th:each="p : ${posts}">
+		      <h2 th:text="${p.title}">Title</h2>
+		      <h5><span>Posted on </span><span th:text="${p.date}">Date</span><i> by </i><span th:text="${p.userName}">Username</span>
+		       <br/>
+		      <span th:if="${user != null and user.username == p.userName}"><a  th:onclick="'deletePostPre(' + ${p.id} + ')'"  data-toggle="modal" href="#deletePost">Delete</a> | <a href="">Change</a></span></h5>
+		     
+		      <div class="fakeimg" style="height:200px;">Image</div>
 		      <p class="content" th:utext="${p.body}">Post body</p>
-		    </article>
-		</main>
-   
-        
+		    </div>
+		  
+		  </div>
+ 
+		</div>       
     </div>
 
 </div>
 
-
+<!-- Person delete modal -->
+<div class="modal" tabindex="-1" role="dialog" id="deletePost">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Delete confirmation</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete post?</p>
+      </div>
+      <div class="modal-footer">
+      	<a  id = "deletePostUrl">
+       		<button type="button" class="btn btn-primary" >Delete</button>
+       		</a>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- /.container -->
 
 <div th:replace="fragments/footer :: footer"/>

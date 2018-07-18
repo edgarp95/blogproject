@@ -1,14 +1,19 @@
 package com.blogproject.post;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
 @Table(name ="post")
@@ -25,18 +30,22 @@ public class Post {
 	private String userName;
 	
 	@Column(name = "title")
-	@NotNull
+	@NotEmpty
 	@NotBlank
 	private String title;
 	
 	@Column(name = "body", columnDefinition="text", length=10485760)
-	@NotNull
+	@NotEmpty
 	@NotBlank
 	private String body;
 	
 	
 	@Column(name = "date")
 	private String date;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="LAST_UPDATE_TIME")
+	private Date lastUpdateTime;
 	
 	public Long getId() {
 		return id;
@@ -79,6 +88,15 @@ public class Post {
 	}
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+	
+	
+	
+	public Date getLastUpdateTime() {
+		return lastUpdateTime;
+	}
+	public void setLastUpdateTime(Date lastUpdateTime) {
+		this.lastUpdateTime = lastUpdateTime;
 	}
 	public Post() {
 		super();

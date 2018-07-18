@@ -2,6 +2,7 @@ package com.blogproject.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -41,84 +44,110 @@ public class DefaultController {
 
 	@Autowired
 	private PostRepository postrepository;
-	
-	
-	 @Autowired
-	 private UserService userService;
 
-	 @Autowired
-	 private SecurityService securityService;
+	@Autowired
+	private UserService userService;
 
-	 @Autowired
-	 private UserValidator userValidator;
+	@Autowired
+	private SecurityService securityService;
+
+	@Autowired
+	private UserValidator userValidator;
 
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
 	@GetMapping("/")
-	public ModelAndView home1() {
+	public ModelAndView home1(@AuthenticationPrincipal UserDetails currentUser) {
+
 		log.info("OLEN!");
 		ModelAndView homeView = new ModelAndView("/home");
-		homeView.addObject("posts", postrepository.findAllByOrderByDateDesc());
+		if (currentUser != null) {
+			homeView.addObject("user", userService.findByUsername(currentUser.getUsername()));
+		}
+
+		homeView.addObject("posts", postrepository.findAllByOrderByLastUpdateTimeDesc());
 		return homeView;
 	}
-	
-	
+
 	@GetMapping(value = "/createpost")
-	public ModelAndView openPostCreate() {
-		ModelAndView postCreateView = new ModelAndView("/addpost");
-		postCreateView.addObject("post", new Post());
-		
-		return postCreateView;
+	public String openPostCreate(Post post) {
+		/*
+		 * ModelAndView postCreateView = new ModelAndView("/addpost");
+		 * postCreateView.addObject("post", new Post());
+		 * 
+		 * return postCreateView;
+		 */
+		return "/addpost";
 	}
-	
+
 	@PostMapping(value = "/addPost")
-	public String createPost(@Valid Post post, BindingResult bindingResult)  {
-		User user = userService.findById((long) 1);
+	public String createPost(@Valid Post post, BindingResult bindingResult,
+			@AuthenticationPrincipal UserDetails currentUser) {
+
+		if (bindingResult.hasErrors()) {
+			return "/addpost";
+		}
+
+		User user = userService.findByUsername(currentUser.getUsername());
 		post.setDate(LocalDateTime.now().format(formatter));
 		post.setUserId(user.getId());
 		post.setUserName(user.getUsername());
-		log.debug(post.getBody());
-		log.debug(post.getTitle());
-		//TODO: Check bindingresult 
+		post.setLastUpdateTime((new Date()));
 		postrepository.save(post);
-		
+
 		return "redirect:/";
-		
+
 	}
 
+	@RequestMapping(value = "/test", method = RequestMethod.GET)
+	public String test() {
 
+		return "redirect:/";
 
+	}
 
-	
-	  @RequestMapping(value = "/registration", method = RequestMethod.GET)
-	    public String registration(Model model) {
-	        model.addAttribute("userForm", new User());
+	@GetMapping(value = "deletePost/{id}")
+	public String deletePost(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails currentUser) {
+		Post post = postrepository.findById(id);
 
-	        return "registration";
-	    }
+		if (currentUser == null || !currentUser.getUsername().equals(post.getUserName())) {
+			// ERROR!
+		}
 
-	    @RequestMapping(value = "/registration", method = RequestMethod.POST)
-	    public String registration(@ModelAttribute("userForm") User userForm, BindingResult bindingResult, Model model) {
-	        userValidator.validate(userForm, bindingResult);
+		else {
+			postrepository.delete(post);
 
-	        if (bindingResult.hasErrors()) {
-	            return "registration";
-	        }
+		}
 
-	        userService.save(userForm);
+		return "redirect:/";
+	}
 
-	        securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
+	@RequestMapping(value = "/registration", method = RequestMethod.GET)
+	public String registration(Model model) {
+		model.addAttribute("userForm", new User());
 
-	        return "redirect:/";
-	    }
+		return "registration";
+	}
 
-	    @RequestMapping(value = "/login", method = RequestMethod.GET)
-	    public String login(Model model, String error, String logout) {
-	       
+	@RequestMapping(value = "/registration", method = RequestMethod.POST)
+	public String registration(@ModelAttribute("userForm") User userForm, BindingResult bindingResult, Model model) {
+		userValidator.validate(userForm, bindingResult);
 
-	      
+		if (bindingResult.hasErrors()) {
+			return "registration";
+		}
 
-	        return "login";
-	    }
+		userService.save(userForm);
+
+		securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
+
+		return "redirect:/";
+	}
+
+	@RequestMapping(value = "/login", method = RequestMethod.GET)
+	public String login(Model model, String error, String logout) {
+
+		return "login";
+	}
 
 }
