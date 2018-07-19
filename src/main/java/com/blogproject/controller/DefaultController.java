@@ -3,34 +3,22 @@ package com.blogproject.controller;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.servlet.view.RedirectView;
-
 import com.blogproject.auth.User;
 import com.blogproject.post.Post;
 import com.blogproject.repository.PostRepository;
@@ -53,13 +41,11 @@ public class DefaultController {
 
 	@Autowired
 	private UserValidator userValidator;
-
+	static final String HOME = "redirect:/";
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
 	@GetMapping("/")
 	public ModelAndView home1(@AuthenticationPrincipal UserDetails currentUser) {
-
-		log.info("OLEN!");
 		ModelAndView homeView = new ModelAndView("/home");
 		if (currentUser != null) {
 			homeView.addObject("user", userService.findByUsername(currentUser.getUsername()));
@@ -71,12 +57,7 @@ public class DefaultController {
 
 	@GetMapping(value = "/createpost")
 	public String openPostCreate(Post post) {
-		/*
-		 * ModelAndView postCreateView = new ModelAndView("/addpost");
-		 * postCreateView.addObject("post", new Post());
-		 * 
-		 * return postCreateView;
-		 */
+
 		return "/addpost";
 	}
 
@@ -95,14 +76,53 @@ public class DefaultController {
 		post.setLastUpdateTime((new Date()));
 		postrepository.save(post);
 
-		return "redirect:/";
+		return HOME;
 
 	}
 
-	@RequestMapping(value = "/test", method = RequestMethod.GET)
-	public String test() {
+	@GetMapping(value = "post/{id}")
+	public ModelAndView openPost(@PathVariable("id") Long id, @ModelAttribute("userForm") User userForm) {
+		Post post = postrepository.findById(id);
+		ModelAndView postview = new ModelAndView("/post");
+		postview.addObject(post);
+		return postview;
+	}
 
-		return "redirect:/";
+	@GetMapping(value = "changePost/{id}")
+	public ModelAndView changePostOpen(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails currentUser) {
+		Post post = postrepository.findById(id);
+
+		if (currentUser != null && currentUser.getUsername().equals(post.getUserName())) {
+
+			ModelAndView postview = new ModelAndView("/changepost");
+			postview.addObject(post);
+			return postview;
+		} else {
+			return new ModelAndView("/error");
+		}
+
+	}
+
+	@PostMapping(value = "changePost/{id}")
+	public String changePost(@PathVariable("id") Long id, @Valid Post post, BindingResult bindingResult,
+			@AuthenticationPrincipal UserDetails currentUser) {
+
+		Post originalPost = postrepository.findById(id);
+		if (currentUser != null && currentUser.getUsername().equals(originalPost.getUserName())) {
+			if (bindingResult.hasErrors()) {
+				return "/changepost";
+			}
+
+			originalPost.setBody(post.getBody());
+			originalPost.setTitle(post.getTitle());
+			originalPost.setDate(LocalDateTime.now().format(formatter));
+			originalPost.setLastUpdateTime((new Date()));
+			postrepository.save(originalPost);
+			// TODO: Success message!
+			return HOME;
+		} else {
+			return "redirect:/error";
+		}
 
 	}
 
@@ -111,7 +131,7 @@ public class DefaultController {
 		Post post = postrepository.findById(id);
 
 		if (currentUser == null || !currentUser.getUsername().equals(post.getUserName())) {
-			// ERROR!
+			return "redirect:/error";
 		}
 
 		else {

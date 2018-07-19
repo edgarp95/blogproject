@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<script src="../webjars/jquery/3.2.1/dist/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../webjars/bootstrap/3.3.7/css/bootstrap.min.css"/>
+<script src="../webjars/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../../static/css/main.css" />
+<script th:src="@{/js/app.js}"></script>
+<div th:replace="fragments/header :: header-css" />
+</head>
+<body>
+
+	<div th:replace="fragments/header :: header" />
+
+
+	<div class="container" id="blogbody">
+		<div class="starter-template">
+			<div class="row">
+				<div class="leftcolumn">
+					<div class="card">
+						<h2 th:text="${post.title}">Title</h2>
+						<h5>
+							<span>Posted on </span><span th:text="${post.date}">Date</span><i>
+								by </i><span th:text="${post.userName}">Username</span>
+							
+						</h5>
+
+						<div class="fakeimg" style="height: 200px;">Image</div>
+						<p class="content" th:utext="${post.body}">Post body</p>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
+	
+	<!-- /.container -->
+
+	<div th:replace="fragments/footer :: footer" />
+
+</body>
+</html>
