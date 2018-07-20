@@ -4,5 +4,3 @@ function deletePostPre(id) {
 }
 
 
-
-

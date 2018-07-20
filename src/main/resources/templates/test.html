@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>Blogsproject mainpage</title>
+<script type="text/javascript"
+	src="webjars/jquery/3.2.1/dist/jquery.min.js"></script>
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../../static/css/main.css" />
+<script th:src="@{/js/app.js}"></script>
+<div th:replace="fragments/header :: header-css" />
+
+</head>
+<body>
+
+	<div th:replace="fragments/header :: header" />
+
+
+
+
+	<div class="container" id="blogbody">
+		<div class="starter-template">
+			<div class="row">
+				<div class="leftcolumn">
+				<ul class="nav nav-pills">
+						<li class="nav-item" th:each="i : ${#numbers.sequence(0, posts.totalPages-1)}" th:classappend="${currentPage} == ${i}?'active':''">
+							<a th:text="${i}+1" class="nav-link" th:href="@{/test(page=${i})}"></a>
+						</li>
+					</ul>
+					<hr/>
+				
+					<div class="card" th:each="p : ${posts.content}">
+						<a th:href="@{/post/}+${p.id}"><h2 th:text="${p.title}">Title</h2></a>
+						<h5>
+							<span>Posted on </span><span th:text="${p.date}">Date</span><i>
+								by </i><span th:text="${p.userName}">Username</span> <br /> <span
+								th:if="${user != null and user.username == p.userName}"><a
+								th:onclick="'deletePostPre(' + ${p.id} + ')'"
+								data-toggle="modal" href="#deletePost">Delete</a> | <a th:href="@{/changePost/}+${p.id}">Change</a></span>
+						</h5>
+
+						<div class="fakeimg" style="height: 200px;">Image</div>
+						<p class="content" th:utext="${p.body}">Post body</p>
+					</div>
+					
+					<hr/>
+					<ul class="nav nav-pills">
+						<li class="nav-item" th:each="i : ${#numbers.sequence(0, posts.totalPages-1)}" th:classappend="${currentPage} == ${i}?'active':''">
+							<a th:text="${i}+1" class="nav-link" th:href="@{/test(page=${i})}"></a>
+						</li>
+					</ul>
+
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+
+	
+	<!-- /.container -->
+
+	<div th:replace="fragments/footer :: footer" />
+
+</body>
+</html>

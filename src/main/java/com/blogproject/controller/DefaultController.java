@@ -1,5 +1,6 @@
 package com.blogproject.controller;
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -7,6 +8,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import com.blogproject.auth.User;
 import com.blogproject.post.Post;
@@ -45,27 +48,46 @@ public class DefaultController {
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
 	@GetMapping("/")
-	public ModelAndView home1(@AuthenticationPrincipal UserDetails currentUser) {
-		ModelAndView homeView = new ModelAndView("/home");
+	public String home1(Model model, @RequestParam(defaultValue="0") int page, @AuthenticationPrincipal UserDetails currentUser) {
+
+		model.addAttribute("posts", postrepository.findAllByOrderByLastUpdateTimeDesc(new PageRequest(page, 5)));
+		model.addAttribute("currentPage", page);
+		model.addAttribute("classActiveHome","active");
 		if (currentUser != null) {
-			homeView.addObject("user", userService.findByUsername(currentUser.getUsername()));
+			model.addAttribute("user", userService.findByUsername(currentUser.getUsername()));
 		}
 
-		homeView.addObject("posts", postrepository.findAllByOrderByLastUpdateTimeDesc());
-		return homeView;
+		return "/home";
 	}
+	
+	@RequestMapping(value = "/search", method = RequestMethod.POST)
+	public String search(Model model, @RequestParam("title") String title, @AuthenticationPrincipal UserDetails currentUser) {
+		log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+		model.addAttribute("posts", postrepository.findBytitle(title));
+		if (currentUser != null) {
+			model.addAttribute("user", userService.findByUsername(currentUser.getUsername()));
+		}
+
+		return "/search";
+	}
+	
+	
+	
+	
+
 
 	@GetMapping(value = "/createpost")
-	public String openPostCreate(Post post) {
-
+	public String openPostCreate(Model model, Post post) {
+		model.addAttribute("classActiveAddPost","active");
 		return "/addpost";
 	}
 
 	@PostMapping(value = "/addPost")
 	public String createPost(@Valid Post post, BindingResult bindingResult,
-			@AuthenticationPrincipal UserDetails currentUser) {
+			@AuthenticationPrincipal UserDetails currentUser, Model model) {
 
 		if (bindingResult.hasErrors()) {
+			model.addAttribute("classActiveAddPost","active");
 			return "/addpost";
 		}
 
@@ -145,7 +167,7 @@ public class DefaultController {
 	@RequestMapping(value = "/registration", method = RequestMethod.GET)
 	public String registration(Model model) {
 		model.addAttribute("userForm", new User());
-
+		model.addAttribute("classActiveRegistration","active");
 		return "registration";
 	}
 
