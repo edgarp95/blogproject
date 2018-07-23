@@ -16,6 +16,9 @@
 
 	<div th:replace="fragments/header :: header" />
 
+	<div th:if="${commentSuccess != null}" class="alert alert-success">
+		<p th:text="#{dashboard.commentSuccess}"></p>
+	</div>
 
 	<div class="container" id="blogbody">
 		<div class="starter-template">
@@ -31,6 +34,47 @@
 
 						<div class="fakeimg" style="height: 200px;">Image</div>
 						<p class="content" th:utext="${post.body}">Post body</p>
+					</div>
+					
+					<div class="card">
+						<h2>Comments</h2>
+						<hr/>
+						<div th:if="${comments.size() == 0}">There are no comments yet!</div>
+						<div th:each="c : ${comments}">
+							<h5>
+								<i><span th:text="${c.userName}"></span><span> on </span><span th:text="${c.date}">Date</span></i>
+								
+								<a th:href="@{/deleteComment/}+${post.id}+'?commentId='+${c.id}"><span class="glyphicon glyphicon-trash"  th:if="${user != null and user.username == c.userName}"></span></a>
+							</h5>
+							<h4 th:text="${c.body}">Comment</h4>
+							
+							<br/>
+							<hr/>
+						</div>	
+						
+					</div>
+					
+					<div class="card" sec:authorize="isAuthenticated()">
+						<h2>Add comment</h2>
+						
+						<form th:action="@{/addComment/}+${post.id}" method="post" th:object="${comment}">
+							<label data-error="wrong" data-success="right" for="form34">Insert
+							comment</label>
+						<div th:if="${#fields.hasErrors('body')}" th:errors="*{body}"
+							class="alert alert-danger">
+							<p th:if="${#fields.hasErrors('body')}" th:errors="*{body}"></p>
+						</div>
+
+						<i class="fa fa-user prefix grey-text"></i> <input type="text"
+							id="form34" class="form-control validate" th:field="*{body}" />
+					
+						<div class="modal-footer d-flex justify-content-center">
+							<button type="submit" class="btn btn-primary">
+								Add comment<i class="fa fa-paper-plane-o ml-1"></i>
+							</button>
+						</div>	
+						</form>	
+						
 					</div>
 
 				</div>

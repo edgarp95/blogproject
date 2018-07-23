@@ -15,36 +15,7 @@
 
 	<div th:replace="fragments/header :: header" />
 
-	<div th:if="${nameError != null}" class="alert alert-danger">
-		<p th:text="#{dashboard.nameError}"></p>
-	</div>
-	<div th:if="${personDeleteSuccess != null}" class="alert alert-success">
-		<p th:text="#{dashboard.personDeleteSuccess}"></p>
-	</div>
-	<div th:if="${houseworkDeleteSuccess != null}"
-		class="alert alert-success">
-		<p th:text="#{dashboard.houseworkDeleteSuccess}"></p>
-	</div>
-	<div th:if="${houseworkError != null}" class="alert alert-danger">
-		<p th:text="#{dashboard.houseworkError}"></p>
-	</div>
-	<div th:if="${personhouseworkError != null}" class="alert alert-danger">
-		<p th:text="#{dashboard.personhouseworkError}"></p>
-	</div>
-	<div th:if="${nameSuccess != null}" class="alert alert-success">
-		<p th:text="#{dashboard.nameSuccess}"></p>
-	</div>
-	<div th:if="${houseworkSuccess != null}" class="alert alert-success">
-		<p th:text="#{dashboard.houseworkSuccess}"></p>
-	</div>
-	<div th:id="personhouseworkSuccess"
-		class="alert alert-success collapse">
-		<p th:text="#{dashboard.personhouseworkSuccess}"></p>
-	</div>
-	<div th:id="personAddPlayinghoursSuccess"
-		class="alert alert-success collapse">
-		<p th:text="#{dashboard.personAddPlayinghoursSuccess}"></p>
-	</div>
+	
 
 
 
