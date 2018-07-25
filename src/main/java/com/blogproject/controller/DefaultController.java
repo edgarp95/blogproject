@@ -61,7 +61,7 @@ public class DefaultController {
 	static final String HOME = "redirect:/";
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
-	@GetMapping("/")
+	@GetMapping("/blogproject")
 	public String home1(Model model, @RequestParam(defaultValue = "0") int page,
 			@AuthenticationPrincipal UserDetails currentUser) {
 
@@ -104,6 +104,7 @@ public class DefaultController {
 
 		// cover image
 		if (!multipartFile.isEmpty()) {
+			log.info("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIIIIII");
 			post.setPath(createFile(multipartFile));
 		} else {
 			post.setPath("/images/no_image.jpg");
