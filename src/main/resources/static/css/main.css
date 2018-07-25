@@ -1,5 +1,5 @@
 h2 {
-	color: #FF0000;
+	color: #000000;
 }
 
 footer {
@@ -38,7 +38,7 @@ footer {
 .fakeimg {
 	background-color: #aaa;
 	width: 100%;
-	padding: 20px;
+	padding: 10px;
 }
 
 #loginButtons {

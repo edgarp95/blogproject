@@ -1,6 +1,7 @@
 package com.blogproject.controller;
-
-import java.awt.print.Pageable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -23,11 +24,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.blogproject.auth.User;
 import com.blogproject.comment.Comment;
+import com.blogproject.config.RandomString;
 import com.blogproject.post.Post;
 import com.blogproject.repository.CommentRepository;
 import com.blogproject.repository.PostRepository;
@@ -37,6 +40,7 @@ import com.blogproject.validator.UserValidator;
 
 @Controller
 public class DefaultController {
+	@SuppressWarnings(value = { "unused" })
 	private static Logger log = LoggerFactory.getLogger(DefaultController.class);
 
 	@Autowired
@@ -50,6 +54,7 @@ public class DefaultController {
 
 	@Autowired
 	private SecurityService securityService;
+
 
 	@Autowired
 	private UserValidator userValidator;
@@ -73,7 +78,6 @@ public class DefaultController {
 	@RequestMapping(value = "/search", method = RequestMethod.POST)
 	public String search(Model model, @RequestParam("title") String title,
 			@AuthenticationPrincipal UserDetails currentUser) {
-		log.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 		model.addAttribute("posts", postrepository.findBytitle(title));
 		if (currentUser != null) {
 			model.addAttribute("user", userService.findByUsername(currentUser.getUsername()));
@@ -90,11 +94,19 @@ public class DefaultController {
 
 	@PostMapping(value = "/addPost")
 	public String createPost(@Valid Post post, BindingResult bindingResult,
-			@AuthenticationPrincipal UserDetails currentUser, Model model) {
+			@AuthenticationPrincipal UserDetails currentUser, Model model,
+			@RequestParam("file") MultipartFile multipartFile) throws IOException {
 
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("classActiveAddPost", "active");
 			return "/addpost";
+		}
+
+		// cover image
+		if (!multipartFile.isEmpty()) {
+			post.setPath(createFile(multipartFile));
+		} else {
+			post.setPath("/images/no_image.jpg");
 		}
 
 		User user = userService.findByUsername(currentUser.getUsername());
@@ -109,11 +121,11 @@ public class DefaultController {
 	}
 
 	@GetMapping(value = "post/{id}")
-	public ModelAndView openPost(@PathVariable("id") Long id, Comment comment, @AuthenticationPrincipal UserDetails currentUser) {
+	public ModelAndView openPost(@PathVariable("id") Long id, Comment comment,
+			@AuthenticationPrincipal UserDetails currentUser) {
 		Post post = postrepository.findById(id);
 		List<Comment> comments = commentrepository.findByPostIdOrderByLastUpdateTimeDesc(post.getId());
 
-		
 		ModelAndView postview = new ModelAndView("/post");
 		if (currentUser != null) {
 			postview.addObject("user", userService.findByUsername(currentUser.getUsername()));
@@ -122,15 +134,16 @@ public class DefaultController {
 		postview.addObject("comments", comments);
 		return postview;
 	}
-	
+
 	@GetMapping(value = "deleteComment/{id}")
-	public String deleteComment(@PathVariable("id") Long id,@RequestParam("commentId") Long commentId, @AuthenticationPrincipal UserDetails currentUser) {
+	public String deleteComment(@PathVariable("id") Long id, @RequestParam("commentId") Long commentId,
+			@AuthenticationPrincipal UserDetails currentUser) {
 		Comment comment = commentrepository.findByid(commentId);
-		if (comment == null || currentUser == null  || !comment.getUserName().equals(currentUser.getUsername())) {
+		if (comment == null || currentUser == null || !comment.getUserName().equals(currentUser.getUsername())) {
 			return "/error";
 		}
 		commentrepository.delete(comment);
-		return "redirect:/post/"+id;
+		return "redirect:/post/" + id;
 	}
 
 	@PostMapping(value = "addComment/{id}")
@@ -142,16 +155,14 @@ public class DefaultController {
 			return "/error";
 		}
 		model.addAttribute("user", userService.findByUsername(currentUser.getUsername()));
-		
-		
+
 		List<Comment> comments = commentrepository.findByPostIdOrderByLastUpdateTimeDesc(post.getId());
 		model.addAttribute("post", post);
 		model.addAttribute("comments", comments);
-		
+
 		if (bindingResult.hasErrors()) {
 			return "/post";
 		}
-		
 
 		User user = userService.findByUsername(currentUser.getUsername());
 		comment.setPostId(id);
@@ -159,7 +170,7 @@ public class DefaultController {
 		comment.setUserName(user.getUsername());
 		comment.setLastUpdateTime((new Date()));
 		commentrepository.save(comment);
-		
+
 		attributes.addFlashAttribute("commentSuccess", "commentSuccess");
 		return "redirect:/post/" + id;
 	}
@@ -181,7 +192,9 @@ public class DefaultController {
 
 	@PostMapping(value = "changePost/{id}")
 	public String changePost(@PathVariable("id") Long id, @Valid Post post, BindingResult bindingResult,
-			@AuthenticationPrincipal UserDetails currentUser) {
+			@AuthenticationPrincipal UserDetails currentUser, @RequestParam("file") MultipartFile multipartFile,
+			RedirectAttributes attributes)
+			throws IOException {
 
 		Post originalPost = postrepository.findById(id);
 		if (currentUser != null && currentUser.getUsername().equals(originalPost.getUserName())) {
@@ -189,12 +202,17 @@ public class DefaultController {
 				return "/changepost";
 			}
 
+			if (!multipartFile.isEmpty()) {
+				deleteFile(originalPost.getPath());
+				originalPost.setPath(createFile(multipartFile));
+			}
+
 			originalPost.setBody(post.getBody());
 			originalPost.setTitle(post.getTitle());
 			originalPost.setDate(LocalDateTime.now().format(formatter));
 			originalPost.setLastUpdateTime((new Date()));
 			postrepository.save(originalPost);
-			// TODO: Success message!
+			attributes.addFlashAttribute("successChange", "successChange");
 			return HOME;
 		} else {
 			return "redirect:/error";
@@ -211,6 +229,7 @@ public class DefaultController {
 		}
 
 		else {
+			deleteFile(post.getPath());
 			postrepository.delete(post);
 
 		}
@@ -244,6 +263,35 @@ public class DefaultController {
 	public String login(Model model, String error, String logout) {
 
 		return "login";
+	}
+
+	public String createFile(MultipartFile multipartFile) throws IOException {
+		File convFile;
+		String path = "";
+		RandomString random = new RandomString();
+		while (true) {
+			path = random.nextString() + ".jpg";
+			convFile = new File("src/main/resources/static/images/" + path);
+			if (!convFile.exists())
+				break;
+		}
+
+		FileOutputStream fos = new FileOutputStream(convFile);
+		fos.write(multipartFile.getBytes());
+		fos.close();
+
+		return "/images/" + path;
+	}
+
+	public void deleteFile(String path) {
+		// standart image, don't delete it!
+		if (!path.equals("/images/no_image.jpg")) {
+			File f = new File("src/main/resources/static" + path);
+			if (f.exists())
+				f.delete();
+
+		}
+
 	}
 
 }

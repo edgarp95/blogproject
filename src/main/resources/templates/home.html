@@ -15,7 +15,9 @@
 
 	<div th:replace="fragments/header :: header" />
 
-	
+	<div th:if="${successChange != null}" class="alert alert-success">
+		<p th:text="#{dashboard.successChange}"></p>
+	</div>
 
 
 
@@ -24,7 +26,7 @@
 		<div class="starter-template">
 			<div class="row">
 				<div class="leftcolumn">
-				<ul class="nav nav-pills">
+				<ul class="nav nav-pills" th:if="${posts.totalPages > 0}">
 						<li class="nav-item" th:each="i : ${#numbers.sequence(0, posts.totalPages-1)}" th:classappend="${currentPage} == ${i}?'active':''">
 							<a th:text="${i}+1" class="nav-link" th:href="@{/(page=${i})}"></a>
 						</li>
@@ -41,12 +43,14 @@
 								data-toggle="modal" href="#deletePost">Delete</a> | <a th:href="@{/changePost/}+${p.id}">Change</a></span>
 						</h5>
 
-						<div class="fakeimg" style="height: 200px;">Image</div>
+						<div  style="height: 200px;">
+							<img class="fakeimg" th:src="@{${p.path}}"  height="200"/>
+						</div>
 						<p class="content" th:utext="${p.body}">Post body</p>
 					</div>
 					
 					<hr/>
-					<ul class="nav nav-pills">
+					<ul class="nav nav-pills" th:if="${posts.totalPages > 0}">
 						<li class="nav-item" th:each="i : ${#numbers.sequence(0, posts.totalPages-1)}" th:classappend="${currentPage} == ${i}?'active':''">
 							<a th:text="${i}+1" class="nav-link" th:href="@{/(page=${i})}"></a>
 						</li>

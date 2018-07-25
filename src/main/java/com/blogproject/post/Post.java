@@ -39,6 +39,9 @@ public class Post {
 	@NotBlank
 	private String body;
 	
+	@Column(name = "path")
+	private String path;
+	
 	
 	@Column(name = "date")
 	private String date;
@@ -83,6 +86,12 @@ public class Post {
 	
 	
 	
+	public String getPath() {
+		return path;
+	}
+	public void setPath(String path) {
+		this.path = path;
+	}
 	public String getUserName() {
 		return userName;
 	}
@@ -101,15 +110,19 @@ public class Post {
 	public Post() {
 		super();
 	}
-	public Post(Long id, Long userId, String title, String body, String date, String userName) {
+	public Post(Long id, Long userId, String userName, String title, String body, String path, String date,
+			Date lastUpdateTime) {
 		super();
 		this.id = id;
 		this.userId = userId;
+		this.userName = userName;
 		this.title = title;
 		this.body = body;
+		this.path = path;
 		this.date = date;
-		this.userName = userName;
+		this.lastUpdateTime = lastUpdateTime;
 	}
+	
 	
 	
 	

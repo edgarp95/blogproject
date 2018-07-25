@@ -32,7 +32,9 @@
 							
 						</h5>
 
-						<div class="fakeimg" style="height: 200px;">Image</div>
+						<div  style="height: 200px;">
+							<img class="fakeimg" th:src="@{${post.path}}"  height="200"/>
+						</div>
 						<p class="content" th:utext="${post.body}">Post body</p>
 					</div>
 					

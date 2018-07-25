@@ -21,7 +21,7 @@
 
 	<div class="container">
 		<div class="starter-template">
-			<form th:action="@{/addPost}" method="post" th:object="${post}">
+			<form th:action="@{/addPost}" method="post" th:object="${post}" enctype="multipart/form-data">
 				<div class="modal-body mx-3">
 
 					<div class="md-form mb-5">
@@ -50,7 +50,8 @@
 						<i class="fa fa-envelope prefix grey-text"></i>
 						<textarea rows="4" cols="50" name="comment"
 							class="form-control validate" th:field="*{body}"></textarea>
-
+						<label data-error="wrong" data-success="right" for="form29">Insert cover picture</label>	
+						<input type="file"  name="file" />
 					</div>
 
 

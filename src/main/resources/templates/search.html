@@ -14,7 +14,7 @@
 <body>
 
 	<div th:replace="fragments/header :: header" />
-
+	
 
 
 
@@ -22,6 +22,9 @@
 	<div class="container" id="blogbody">
 		<div class="starter-template">
 			<div class="row">
+				<div  class="alert alert-success">
+					<p th:text="'Found ' + ${posts.size() + ' posts!'}"></p>
+				</div>
 				<div class="leftcolumn">
 
 				
