@@ -8,4 +8,6 @@ public interface UserService {
     User findByUsername(String username);
     
     User findById(Long id);
+    
+    void addDetails(User user);
 }

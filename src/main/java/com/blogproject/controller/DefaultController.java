@@ -54,6 +54,9 @@ public class DefaultController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired 
+	private UserRepository userrepository;
+	
 	@Autowired
 	private SecurityService securityService;
 
@@ -302,7 +305,7 @@ public class DefaultController {
 		if (!email.isEmpty()) {
 			user.setEmail(email);
 		}
-		userService.save(user);
+		userService.addDetails(user);
 		
 		return user;
 	}
