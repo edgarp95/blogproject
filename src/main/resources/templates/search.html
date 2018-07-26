@@ -33,7 +33,7 @@
 						<h5>
 							<span>Posted on </span><span th:text="${p.date}">Date</span><i>
 								by </i><span th:text="${p.userName}">Username</span> <br /> <span
-								th:if="${user != null and user.username == p.userName}"><a
+								th:if="${loggedUser != null and loggedUser.username == p.userName}"><a
 								th:onclick="'deletePostPre(' + ${p.id} + ')'"
 								data-toggle="modal" href="#deletePost">Delete</a> | <a th:href="@{/changePost/}+${p.id}">Change</a></span>
 						</h5>

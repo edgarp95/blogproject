@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>Profile</title>
+<script type="text/javascript"
+	src="../webjars/jquery/3.2.1/dist/jquery.min.js"></script>
+<link rel="stylesheet" th:href="@{/css/main.css}"
+	href="../../static/css/main.css" />
+<script th:src="@{/js/app.js}"></script>
+<div th:replace="fragments/header :: header-css" />
+
+</head>
+<body>
+
+	<div th:replace="fragments/header :: header" />
+
+
+
+
+
+	<div class="container">
+		<div class="starter-template">
+			<div class="card" id="profile">
+			  <img th:src="@{/images/users/default_user.jpg}" style="width:50%"/>
+			  <h1 th:text="${user.username}"></h1>
+			  <h5 th:text="${user.registration} == null ? 'Registered on ???' : 'Registered on ' + ${user.registration}"></h5>
+			  <h4><b>About me</b></h4>
+			  <p id="aboutText" th:text="${user.about} != null ? ${user.about} : 'No information yet!'">fewefew</p>
+			  
+			 <p th:if="${loggedUser != null and loggedUser.username == user.username}">
+			 	<button class="profileButton" data-toggle="modal" data-target="#addProfileDetailsModal" th:onclick="'addProfileDetailsPre()'">Add information</button>
+			 </p>  
+			 <a id="emailUrl" th:href="'mailto:' + ${user.email}"><button class="profileButton">Contact</button></a>
+			</div>
+			
+		
+
+
+		</div>
+
+	</div>
+
+	<div class="modal" tabindex="-1" role="dialog" id="addProfileDetailsModal">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <h5 class="modal-title">Add information (fields are optional!)</h5>
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	      </div>
+	      
+	      <div class="modal-body">
+	      	<div th:id="noinfoError"  class="alert alert-danger collapse">
+	     		<p th:text="#{dashboard.noinfoError}"></p>
+			</div>
+	      	<div th:id="aboutError"  class="alert alert-danger collapse">
+	     		<p th:text="#{dashboard.aboutError}"></p>
+			</div>
+			<div th:id="aboutError2"  class="alert alert-danger collapse">
+	     		<p th:text="#{dashboard.aboutError2}"></p>
+	     	</div>
+	      	<label data-error="wrong" data-success="right" for="form34">Tell us about yourself (3 to 1000 symbols)</label>
+	        <i class="fa fa-envelope prefix grey-text"></i>
+			<textarea rows="4" cols="50" name="comment" class="form-control validate" id="profileAbout" th:text="${user.about}">
+			</textarea>
+			<br/>
+			
+			<div th:id="emailError"  class="alert alert-danger collapse">
+	     		<p th:text="#{dashboard.emailError}"></p>
+			</div>
+			<label data-error="wrong" data-success="right" for="form34">Insert your email</label>		
+			<i class="fa fa-user prefix grey-text"></i> <input type="text"
+				id="profileEmail" class="form-control validate" th:value="${user.email}"/>
+	      </div>
+	      <div class="modal-footer">
+	
+	       	<button type="button" class="btn btn-primary" th:onclick="'addProfileDetails(\'' + ${user.username} + '\')'">Save</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+	      </div>
+	      
+	    </div>
+	  </div>
+	</div>
+	
+	
+	<!-- /.container -->
+
+	
+
+	<div th:replace="fragments/footer :: footer" />
+
+</body>
+</html>

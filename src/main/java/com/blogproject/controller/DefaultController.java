@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -34,6 +35,7 @@ import com.blogproject.config.RandomString;
 import com.blogproject.post.Post;
 import com.blogproject.repository.CommentRepository;
 import com.blogproject.repository.PostRepository;
+import com.blogproject.repository.UserRepository;
 import com.blogproject.service.SecurityService;
 import com.blogproject.service.UserService;
 import com.blogproject.validator.UserValidator;
@@ -61,7 +63,7 @@ public class DefaultController {
 	static final String HOME = "redirect:/";
 	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
 
-	@GetMapping("/blogproject")
+	@GetMapping("/")
 	public String home1(Model model, @RequestParam(defaultValue = "0") int page,
 			@AuthenticationPrincipal UserDetails currentUser) {
 
@@ -69,7 +71,7 @@ public class DefaultController {
 		model.addAttribute("currentPage", page);
 		model.addAttribute("classActiveHome", "active");
 		if (currentUser != null) {
-			model.addAttribute("user", userService.findByUsername(currentUser.getUsername()));
+			model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		}
 
 		return "/home";
@@ -80,15 +82,18 @@ public class DefaultController {
 			@AuthenticationPrincipal UserDetails currentUser) {
 		model.addAttribute("posts", postrepository.findBytitle(title));
 		if (currentUser != null) {
-			model.addAttribute("user", userService.findByUsername(currentUser.getUsername()));
+			model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		}
 
 		return "/search";
 	}
 
 	@GetMapping(value = "/createpost")
-	public String openPostCreate(Model model, Post post) {
+	public String openPostCreate(Model model, Post post, @AuthenticationPrincipal UserDetails currentUser) {
 		model.addAttribute("classActiveAddPost", "active");
+		if (currentUser != null) {
+			model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
+		}
 		return "/addpost";
 	}
 
@@ -116,6 +121,7 @@ public class DefaultController {
 		post.setUserName(user.getUsername());
 		post.setLastUpdateTime((new Date()));
 		postrepository.save(post);
+		
 
 		return HOME;
 
@@ -129,7 +135,7 @@ public class DefaultController {
 
 		ModelAndView postview = new ModelAndView("/post");
 		if (currentUser != null) {
-			postview.addObject("user", userService.findByUsername(currentUser.getUsername()));
+			postview.addObject("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		}
 		postview.addObject(post);
 		postview.addObject("comments", comments);
@@ -155,7 +161,7 @@ public class DefaultController {
 		if (post == null || currentUser == null) {
 			return "/error";
 		}
-		model.addAttribute("user", userService.findByUsername(currentUser.getUsername()));
+		model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 
 		List<Comment> comments = commentrepository.findByPostIdOrderByLastUpdateTimeDesc(post.getId());
 		model.addAttribute("post", post);
@@ -181,9 +187,11 @@ public class DefaultController {
 		Post post = postrepository.findById(id);
 
 		if (currentUser != null && currentUser.getUsername().equals(post.getUserName())) {
-
+			
 			ModelAndView postview = new ModelAndView("/changepost");
 			postview.addObject(post);
+			postview.addObject("loggedUser", userService.findByUsername(currentUser.getUsername()));
+
 			return postview;
 		} else {
 			return new ModelAndView("/error");
@@ -214,6 +222,7 @@ public class DefaultController {
 			originalPost.setLastUpdateTime((new Date()));
 			postrepository.save(originalPost);
 			attributes.addFlashAttribute("successChange", "successChange");
+			
 			return HOME;
 		} else {
 			return "redirect:/error";
@@ -235,13 +244,14 @@ public class DefaultController {
 
 		}
 
-		return "redirect:/";
+		return HOME;
 	}
 
 	@RequestMapping(value = "/registration", method = RequestMethod.GET)
-	public String registration(Model model) {
+	public String registration(Model model,  @AuthenticationPrincipal UserDetails currentUser) {
 		model.addAttribute("userForm", new User());
 		model.addAttribute("classActiveRegistration", "active");
+		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		return "registration";
 	}
 
@@ -252,19 +262,54 @@ public class DefaultController {
 		if (bindingResult.hasErrors()) {
 			return "registration";
 		}
-
+		userForm.setRegistration((LocalDateTime.now().format(formatter)));
 		userService.save(userForm);
 
 		securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
 
-		return "redirect:/";
+		return HOME;
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String login(Model model, String error, String logout) {
-
+	public String login(Model model, String error, String logout, @AuthenticationPrincipal UserDetails currentUser) {
+		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		return "login";
 	}
+	
+	@RequestMapping(value = "/profile/{username}", method = RequestMethod.GET)
+	public String openProfile(@PathVariable("username") String userName, Model model, @AuthenticationPrincipal UserDetails currentUser) {
+		User user = userService.findByUsername(userName);
+		if (user == null) {
+			return "/error";
+		}
+		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
+		model.addAttribute("user", user);
+		
+		return "/profile";
+	}
+	
+	@RequestMapping(value = "/profile/{username}", method = RequestMethod.POST, produces = "application/json")
+	public @ResponseBody User changeProfile(@PathVariable("username") String userName, @RequestParam("about") String about, @RequestParam("email") String email, Model model, @AuthenticationPrincipal UserDetails currentUser) {
+		User user = userService.findByUsername(userName);
+		if (user == null || currentUser == null || !user.getUsername().equals(currentUser.getUsername())) {
+			return null;
+		}
+		if (!about.isEmpty()) {
+			user.setAbout(about);
+		}
+		
+		
+		if (!email.isEmpty()) {
+			user.setEmail(email);
+		}
+		userService.save(user);
+		
+		return user;
+	}
+	
+	
+	
+	
 
 	public String createFile(MultipartFile multipartFile) throws IOException {
 		File convFile;

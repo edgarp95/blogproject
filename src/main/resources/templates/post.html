@@ -46,7 +46,7 @@
 							<h5>
 								<i><span th:text="${c.userName}"></span><span> on </span><span th:text="${c.date}">Date</span></i>
 								
-								<a th:href="@{/deleteComment/}+${post.id}+'?commentId='+${c.id}"><span class="glyphicon glyphicon-trash"  th:if="${user != null and user.username == c.userName}"></span></a>
+								<a th:href="@{/deleteComment/}+${post.id}+'?commentId='+${c.id}"><span class="glyphicon glyphicon-trash"  th:if="${loggedUser != null and loggedUser.username == c.userName}"></span></a>
 							</h5>
 							<h4 th:text="${c.body}">Comment</h4>
 							
