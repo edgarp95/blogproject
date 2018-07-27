@@ -33,6 +33,9 @@ public class User {
     
     @Column(name = "registration")
     private String registration;
+    
+    @Column(name = "avatar")
+    private String avatar;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -84,6 +87,16 @@ public class User {
 
 	public void setRegistration(String registration) {
 		this.registration = registration;
+	}
+	
+	
+
+	public String getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
 	}
 
 	@Transient

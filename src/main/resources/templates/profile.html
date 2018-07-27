@@ -14,15 +14,35 @@
 <body>
 
 	<div th:replace="fragments/header :: header" />
-
-
+	
+	<div th:if="${successAvatar != null}" class="alert alert-success">
+		<p th:text="#{dashboard.successAvatar}"></p>
+	</div>
+	
+	<div th:id="successProfileChange"  class="alert alert-success collapse">
+	   	<p th:text="#{dashboard.successProfileChange}"></p>
+	</div>
+	<div th:id="successDelete"  class="alert alert-success collapse">
+	   	<p th:text="#{dashboard.successDelete}"></p>
+	</div>
 
 
 
 	<div class="container">
 		<div class="starter-template">
 			<div class="card" id="profile">
-			  <img th:src="@{/images/users/default_user.jpg}" style="width:50%"/>
+			  <img th:src="@{${user.avatar}}" style="width:50%"/>
+			  <div th:if="${loggedUser != null and loggedUser.username == user.username}">
+			  	<form method="post" enctype="multipart/form-data" th:action="@{/profileavatar/} + ${user.username}">
+				 <div>
+				   <label for="file">Choose image to upload as avatar</label>
+				   <input  type="file" id="file" name="file"  accept="image/*" required="true"/>
+				 </div>
+				 <div>
+				   <button >Add avatar</button>
+				 </div>
+				</form>
+			  </div>
 			  <h1 th:text="${user.username}"></h1>
 			  <h5 th:text="${user.registration} == null ? 'Registered on ???' : 'Registered on ' + ${user.registration}"></h5>
 			  <h4><b>About me</b></h4>
@@ -31,8 +51,40 @@
 			 <p th:if="${loggedUser != null and loggedUser.username == user.username}">
 			 	<button class="profileButton" data-toggle="modal" data-target="#addProfileDetailsModal" th:onclick="'addProfileDetailsPre()'">Add information</button>
 			 </p>  
-			 <a id="emailUrl" th:href="'mailto:' + ${user.email}"><button class="profileButton">Contact</button></a>
+			 <a id="emailUrl" th:href="'mailto:' + ${user.email}"><button class="profileButton"><span class="glyphicon glyphicon-envelope"></span>Contact</button></a>
+			 <br/>
+			 <br/>
+				<div>
+				  <h1>Posts</h1>
+				  <table class="table table-bordered">
+				    <thead>
+				      <tr>
+				        <th class="text-center">Title</th>
+				        <th class="text-center">Date</th>
+				        <th th:if="${loggedUser != null and loggedUser.username == user.username}" class="text-center">Change</th>
+				        <th th:if="${loggedUser != null and loggedUser.username == user.username}" class="text-center">Delete</th>
+				      </tr>
+				    </thead>
+				    <tbody th:each="post : ${posts}" th:remove="tag">
+				     
+				      <tr th:id="${post.id}">
+				        <td >
+				        	<a th:href="@{/post/}+${post.id}" th:text="${post.title}"></a>
+				        </td>
+				        <td th:text="${post.date}"></td>
+				        <td th:if="${loggedUser != null and loggedUser.username == user.username}">
+				        	 <a th:href="@{/changePost/}+${post.id}"><span class="glyphicon glyphicon-pencil"></span>Change</a>
+				        </td>
+				        <td th:if="${loggedUser != null and loggedUser.username == user.username}">
+				        	<a th:onclick="'deletePost(' + ${post.id} +')'"><span class="glyphicon glyphicon-trash"></span>Delete</a>
+				        </td>
+				      </tr>
+				    </tbody>
+				  </table>
+				   <p th:if="${posts.size() == 0}"><b>There are no posts yet!</b></p>
+				 </div>
 			</div>
+			
 			
 		
 

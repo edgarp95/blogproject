@@ -32,12 +32,14 @@
 						</li>
 					</ul>
 					<hr/>
-				
+					<div th:if="${posts.content.size() == 0}" class="card">
+						<h1 align="center">Oops no posts found!</h1>
+					</div>
 					<div class="card" th:each="p : ${posts.content}">
 						<a th:href="@{/post/}+${p.id}"><h2 th:text="${p.title}">Title</h2></a>
 						<h5>
 							<span>Posted on </span><span th:text="${p.date}">Date</span><i>
-								by </i><span th:text="${p.userName}">Username</span> <br /> <span
+								by </i><a th:href="@{/profile/}+${p.userName}"><span th:text="${p.userName}">Username</span></a> <br /> <span
 								th:if="${loggedUser != null and loggedUser.username == p.userName}"><a
 								th:onclick="'deletePostPre(' + ${p.id} + ')'"
 								data-toggle="modal" href="#deletePost">Delete</a> | <a th:href="@{/changePost/}+${p.id}">Change</a></span>

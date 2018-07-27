@@ -18,6 +18,7 @@ public interface PostRepository extends CrudRepository<Post, Long> {
 	List<Post> findAllByOrderByLastUpdateTimeDesc();
 	Post findById(Long id);
 	Page<Post> findAllByOrderByLastUpdateTimeDesc(Pageable pageable);
+	List<Post> findByUserNameOrderByLastUpdateTimeDesc(String username);
 	
 	
 	

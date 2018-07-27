@@ -1,5 +1,11 @@
 function deletePostPre(id) {
+	console.log("SIIN")
 	var a = document.getElementById("deletePostUrl");
+	a.href = "/deletePost/" + id;
+}
+function deletePostPre1(id) {
+
+	var a = document.getElementById("deletePostUrl1");
 	a.href = "/deletePost/" + id;
 }
 
@@ -9,14 +15,12 @@ function addProfileDetailsPre() {
 	$('#aboutError2').hide();
 	$('#emailError').hide();
 	$('#noinfoError').hide();
+	$('#successProfileChange').hide();
+	$('#successDelete').hide();
 }
 
 function addProfileDetails(index) {
-	$('#aboutError').hide();
-	$('#aboutError2').hide();
-	$('#emailError').hide();
-	$('#noinfoError').hide();
-	
+	addProfileDetailsPre();
 	
 	var emailInput = document.getElementById("profileEmail").value
 	var aboutInput = document.getElementById("profileAbout").value
@@ -62,6 +66,8 @@ function addProfileDetails(index) {
 					document.getElementById("aboutText").innerHTML = data.about;
 					$("#emailUrl").attr("href", "mailto:"+data.email);
 				}
+				$('#successProfileChange').show();
+				
 
 			}
 		})
@@ -79,4 +85,22 @@ function addProfileDetails(index) {
 
 }
 
+function deletePost(id) {
+	console.log(id);
+	$.ajax({
+		type : "POST",
+		url : "/deletePost/" + id,
+		contentType : "application/json; charset=utf-8",
+		dataType : "json",
+		success : function(data) {
+			if (data !== null) {
+				$("#"+data).remove();
+				$('#successDelete').show();
+			}
+			
+		
+		}
+	})
+	
+}
 

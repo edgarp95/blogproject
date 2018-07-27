@@ -113,7 +113,7 @@ public class DefaultController {
 		// cover image
 		if (!multipartFile.isEmpty()) {
 			log.info("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIIIIII");
-			post.setPath(createFile(multipartFile));
+			post.setPath("/images/"+createFile(multipartFile, "src/main/resources/static/images/" ));
 		} else {
 			post.setPath("/images/no_image.jpg");
 		}
@@ -216,7 +216,7 @@ public class DefaultController {
 
 			if (!multipartFile.isEmpty()) {
 				deleteFile(originalPost.getPath());
-				originalPost.setPath(createFile(multipartFile));
+				originalPost.setPath("/images/"+createFile(multipartFile, "src/main/resources/static/images/" ));
 			}
 
 			originalPost.setBody(post.getBody());
@@ -238,7 +238,7 @@ public class DefaultController {
 		Post post = postrepository.findById(id);
 
 		if (currentUser == null || !currentUser.getUsername().equals(post.getUserName())) {
-			return "redirect:/error";
+			return "/error";
 		}
 
 		else {
@@ -248,6 +248,23 @@ public class DefaultController {
 		}
 
 		return HOME;
+	}
+	
+	@RequestMapping(value = "deletePost/{id}", method = RequestMethod.POST, produces = "application/json")
+	public @ResponseBody Long deletePost2(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails currentUser) {
+		Post post = postrepository.findById(id);
+
+		if (currentUser == null || !currentUser.getUsername().equals(post.getUserName())) {
+			return null;
+		}
+
+		else {
+			deleteFile(post.getPath());
+			postrepository.delete(post);
+
+		}
+
+		return id;
 	}
 
 	@RequestMapping(value = "/registration", method = RequestMethod.GET)
@@ -266,6 +283,7 @@ public class DefaultController {
 			return "registration";
 		}
 		userForm.setRegistration((LocalDateTime.now().format(formatter)));
+		userForm.setAvatar("/images/users/default_user.jpg");
 		userService.save(userForm);
 
 		securityService.autologin(userForm.getUsername(), userForm.getPasswordConfirm());
@@ -276,6 +294,8 @@ public class DefaultController {
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login(Model model, String error, String logout, @AuthenticationPrincipal UserDetails currentUser) {
 		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
+		model.addAttribute("classActiveLogin", "active");
+		
 		return "login";
 	}
 	
@@ -285,9 +305,11 @@ public class DefaultController {
 		if (user == null) {
 			return "/error";
 		}
+		List<Post> posts = postrepository.findByUserNameOrderByLastUpdateTimeDesc(userName);
 		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		model.addAttribute("user", user);
-		
+		model.addAttribute("posts", posts);		
+		model.addAttribute("classActiveProfile", "active");
 		return "/profile";
 	}
 	
@@ -310,17 +332,32 @@ public class DefaultController {
 		return user;
 	}
 	
+	@RequestMapping(value = "/profileavatar/{username}", method = RequestMethod.POST)
+	public  String changeAvatar(@PathVariable("username") String userName,  @AuthenticationPrincipal UserDetails currentUser, @RequestParam("file") MultipartFile multipartFile,
+			RedirectAttributes attributes) throws IOException {
+		User user = userService.findByUsername(userName);
+		if (user == null || currentUser == null || !user.getUsername().equals(currentUser.getUsername()) || multipartFile.isEmpty()) {
+			return "/error";
+		}
+		String originalAvatarPath = user.getAvatar();
+		user.setAvatar("/images/users/"+createFile(multipartFile, "src/main/resources/static/images/users/"));
+		userService.addDetails(user);
+		deleteFile(originalAvatarPath);
+		attributes.addFlashAttribute("successAvatar", "successAvatar");
+		return "redirect:/profile/"+userName;
+	}
+	
 	
 	
 	
 
-	public String createFile(MultipartFile multipartFile) throws IOException {
+	public String createFile(MultipartFile multipartFile, String source) throws IOException {
 		File convFile;
 		String path = "";
 		RandomString random = new RandomString();
 		while (true) {
 			path = random.nextString() + ".jpg";
-			convFile = new File("src/main/resources/static/images/" + path);
+			convFile = new File(source + path);
 			if (!convFile.exists())
 				break;
 		}
@@ -329,12 +366,12 @@ public class DefaultController {
 		fos.write(multipartFile.getBytes());
 		fos.close();
 
-		return "/images/" + path;
+		return  path;
 	}
 
 	public void deleteFile(String path) {
 		// standart image, don't delete it!
-		if (!path.equals("/images/no_image.jpg")) {
+		if (!path.equals("/images/no_image.jpg") && !path.equals("/images/users/default_user.jpg")) {
 			File f = new File("src/main/resources/static" + path);
 			if (f.exists())
 				f.delete();

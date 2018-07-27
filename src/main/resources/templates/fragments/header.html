@@ -20,7 +20,7 @@
 					<a class="navbar-brand" th:href="@{/}">Blog project</a>
 				</div>
 				<ul class="nav navbar-nav">
-					<li th:class="${classActiveHome}"><a th:href="@{/}">Home</a></li>
+					<li th:class="${classActiveHome}"><a th:href="@{/}"><span class="glyphicon glyphicon-home"></span>Home</a></li>
 				</ul>
 				<ul class="nav navbar-nav">
 					<li th:class="${classActiveAddPost}"><a th:href="@{/createpost}">Add new post</a></li>
@@ -38,14 +38,14 @@
 	
 				<ul sec:authorize="isAuthenticated()"
 					class="nav navbar-nav navbar-right">
-					<li><a th:href="@{'/profile/'} + ${loggedUser.username}"><span
-							class="glyphicon glyphicon-user" th:text="${loggedUser.username}"></span></a></li>
+					<li th:class="${classActiveProfile}"><a th:href="@{'/profile/'} + ${loggedUser.username}" ><span
+							class="glyphicon glyphicon-user"></span><span th:text="${loggedUser.username}"></span></a></li>
 					<li><a th:href="@{/logout}"><span
 							class="glyphicon glyphicon-log-out"></span>Log out</a></li>
 				</ul>
 				<ul sec:authorize="!isAuthenticated()"
 					class="nav navbar-nav navbar-right">
-					<li><a th:href="@{/login}"><span
+					<li th:class="${classActiveLogin}"><a th:href="@{/login}"><span
 							class="glyphicon glyphicon-log-in"></span>Log in</a></li>
 				</ul>
 				<ul sec:authorize="!isAuthenticated()"
