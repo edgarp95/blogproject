@@ -42,6 +42,9 @@ public class Post {
 	@Column(name = "path")
 	private String path;
 	
+	@Column(name = "rating")
+	private Integer rating = 0;
+	
 	
 	@Column(name = "date")
 	private String date;
@@ -101,6 +104,14 @@ public class Post {
 	
 	
 	
+	
+	
+	public Integer getRating() {
+		return rating;
+	}
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
 	public Date getLastUpdateTime() {
 		return lastUpdateTime;
 	}

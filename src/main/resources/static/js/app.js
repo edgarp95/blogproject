@@ -1,5 +1,4 @@
 function deletePostPre(id) {
-	console.log("SIIN")
 	var a = document.getElementById("deletePostUrl");
 	a.href = "/deletePost/" + id;
 }
@@ -66,7 +65,9 @@ function addProfileDetails(index) {
 					document.getElementById("aboutText").innerHTML = data.about;
 					$("#emailUrl").attr("href", "mailto:"+data.email);
 				}
-				$('#successProfileChange').show();
+				$('#successProfileChange').fadeTo(3000, 500).slideUp(500, function(){
+		               $('#successProfileChange').slideUp(500);
+				})
 				
 
 			}
@@ -95,12 +96,54 @@ function deletePost(id) {
 		success : function(data) {
 			if (data !== null) {
 				$("#"+data).remove();
-				$('#successDelete').show();
+
+				$('#successDelete').fadeTo(3000, 500).slideUp(500, function(){
+		               $('#successDelete').slideUp(500);
+				})
 			}
 			
 		
 		}
 	})
 	
+}
+
+function upVote(id, username) {
+	$.ajax({
+		type : "POST",
+		url : "/upVote/" + id+"?userName="+username,
+		contentType : "application/json; charset=utf-8",
+		dataType : "json",
+		success : function(data) {
+			if (data !== null) {
+				$("#rating"+data.id).text(data.rating)
+				
+				$('#successVote'+data.id).fadeTo(2000, 500).slideUp(500, function(){
+		               $('#successVote'+data.id).slideUp(500);
+				})
+			}
+			
+		
+		}
+	})
+}
+
+function downVote(id, username) {
+	$.ajax({
+		type : "POST",
+		url : "/downVote/" + id+"?userName="+username,
+		contentType : "application/json; charset=utf-8",
+		dataType : "json",
+		success : function(data) {
+			if (data !== null) {
+				$("#rating"+data.id).text(data.rating)
+				$('#successVote'+data.id).fadeTo(2000, 500).slideUp(500, function(){
+		               $('#successVote'+data.id).slideUp(500);
+				})
+			}
+			
+		
+		}
+	})
 }
 

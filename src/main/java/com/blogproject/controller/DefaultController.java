@@ -33,8 +33,10 @@ import com.blogproject.auth.User;
 import com.blogproject.comment.Comment;
 import com.blogproject.config.RandomString;
 import com.blogproject.post.Post;
+import com.blogproject.rating.Rating;
 import com.blogproject.repository.CommentRepository;
 import com.blogproject.repository.PostRepository;
+import com.blogproject.repository.RatingRepository;
 import com.blogproject.repository.UserRepository;
 import com.blogproject.service.SecurityService;
 import com.blogproject.service.UserService;
@@ -55,7 +57,7 @@ public class DefaultController {
 	private UserService userService;
 
 	@Autowired 
-	private UserRepository userrepository;
+	private RatingRepository ratingrepository;
 	
 	@Autowired
 	private SecurityService securityService;
@@ -346,6 +348,93 @@ public class DefaultController {
 		attributes.addFlashAttribute("successAvatar", "successAvatar");
 		return "redirect:/profile/"+userName;
 	}
+	
+	
+	@RequestMapping(value = "/upVote/{postId}", method = RequestMethod.POST,  produces = "application/json")
+	public  @ResponseBody Post upVote(@PathVariable("postId") Long postId,  @AuthenticationPrincipal UserDetails currentUser, @RequestParam("userName") String username,
+			RedirectAttributes attributes)  {
+		Post post = postrepository.findById(postId);
+		if (currentUser == null || !currentUser.getUsername().equals(username) || post == null) {
+			return null;
+		}
+		Rating rating = ratingrepository.findByUserNameAndPostId(username, postId);
+		
+		if (rating == null) {
+			Rating newRating = new Rating();
+			newRating.setPostId(postId);
+			newRating.setUserName(username);
+			newRating.setRate(1);
+			ratingrepository.save(newRating);
+			post.setRating(post.getRating()+1);
+		}
+		
+		else {
+			if (rating.getRate() == 0) {
+				rating.setRate(1);
+				post.setRating(post.getRating()+1);
+			}
+			else if (rating.getRate() == 1) {
+				rating.setRate(0);
+				post.setRating(post.getRating()-1);
+			}
+			// -1 
+			else {
+				rating.setRate(0);
+				post.setRating(post.getRating()+1);
+				
+			}
+			ratingrepository.save(rating);
+		}
+		postrepository.save(post);
+		
+		return post;
+	}
+	
+	
+	@RequestMapping(value = "/downVote/{postId}", method = RequestMethod.POST,  produces = "application/json")
+	public  @ResponseBody Post downVote(@PathVariable("postId") Long postId,  @AuthenticationPrincipal UserDetails currentUser, @RequestParam("userName") String username,
+			RedirectAttributes attributes)  {
+		Post post = postrepository.findById(postId);
+		if (currentUser == null || !currentUser.getUsername().equals(username) || post == null) {
+			return null;
+		}
+		Rating rating = ratingrepository.findByUserNameAndPostId(username, postId);
+		
+		if (rating == null) {
+			Rating newRating = new Rating();
+			newRating.setPostId(postId);
+			newRating.setUserName(username);
+			newRating.setRate(-1);
+			ratingrepository.save(newRating);
+			post.setRating(post.getRating()-1);
+		}
+		
+		else {
+			if (rating.getRate() == 0) {
+				rating.setRate(-1);
+				post.setRating(post.getRating()-1);
+			}
+			else if (rating.getRate() == 1) {
+				rating.setRate(0);
+				post.setRating(post.getRating()-1);
+			}
+			// -1 
+			else {
+				rating.setRate(0);
+				post.setRating(post.getRating()+1);
+				
+			}
+			ratingrepository.save(rating);
+		}
+		postrepository.save(post);
+		
+		return post;
+	}
+	
+	
+	
+	
+	
 	
 	
 	

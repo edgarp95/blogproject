@@ -49,6 +49,19 @@
 							<img class="fakeimg" th:src="@{${p.path}}"  height="200"/>
 						</div>
 						<p class="content" th:utext="${p.body}">Post body</p>
+						<br/>
+						<div>
+							<h4>Rating
+							<br/>
+							
+					          <span th:if="${loggedUser != null}" id="up" th:onclick="'upVote(' + ${p.id} + ',\'' +  ${loggedUser.username} + '\')'" class="glyphicon glyphicon-plus"></span>
+							<span th:id="'rating' + ${p.id}" th:text="${p.rating}"></span>
+							<span th:if="${loggedUser != null}" id="down" th:onclick="'downVote(' + ${p.id} + ',\'' +  ${loggedUser.username} + '\')'" class="glyphicon glyphicon-minus"></span>
+							</h4>
+							<div th:id="'successVote' + ${p.id}"  class="alert alert-success collapse">
+							   	<p th:text="#{dashboard.successVote}"></p>
+							</div>
+						</div>
 					</div>
 					
 					<hr/>
