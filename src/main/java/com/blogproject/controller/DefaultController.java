@@ -1,4 +1,5 @@
 package com.blogproject.controller;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,15 +30,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.blogproject.auth.User;
-import com.blogproject.comment.Comment;
 import com.blogproject.config.RandomString;
-import com.blogproject.post.Post;
-import com.blogproject.rating.Rating;
+import com.blogproject.entities.Comment;
+import com.blogproject.entities.Post;
+import com.blogproject.entities.Rating;
+import com.blogproject.entities.User;
 import com.blogproject.repository.CommentRepository;
 import com.blogproject.repository.PostRepository;
 import com.blogproject.repository.RatingRepository;
-import com.blogproject.repository.UserRepository;
 import com.blogproject.service.SecurityService;
 import com.blogproject.service.UserService;
 import com.blogproject.validator.UserValidator;
@@ -56,12 +56,11 @@ public class DefaultController {
 	@Autowired
 	private UserService userService;
 
-	@Autowired 
+	@Autowired
 	private RatingRepository ratingrepository;
-	
+
 	@Autowired
 	private SecurityService securityService;
-
 
 	@Autowired
 	private UserValidator userValidator;
@@ -115,7 +114,7 @@ public class DefaultController {
 		// cover image
 		if (!multipartFile.isEmpty()) {
 			log.info("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIIIIII");
-			post.setPath("/images/"+createFile(multipartFile, "src/main/resources/static/images/" ));
+			post.setPath("/images/" + createFile(multipartFile, "src/main/resources/static/images/"));
 		} else {
 			post.setPath("/images/no_image.jpg");
 		}
@@ -126,7 +125,6 @@ public class DefaultController {
 		post.setUserName(user.getUsername());
 		post.setLastUpdateTime((new Date()));
 		postrepository.save(post);
-		
 
 		return HOME;
 
@@ -192,7 +190,7 @@ public class DefaultController {
 		Post post = postrepository.findById(id);
 
 		if (currentUser != null && currentUser.getUsername().equals(post.getUserName())) {
-			
+
 			ModelAndView postview = new ModelAndView("/changepost");
 			postview.addObject(post);
 			postview.addObject("loggedUser", userService.findByUsername(currentUser.getUsername()));
@@ -207,8 +205,7 @@ public class DefaultController {
 	@PostMapping(value = "changePost/{id}")
 	public String changePost(@PathVariable("id") Long id, @Valid Post post, BindingResult bindingResult,
 			@AuthenticationPrincipal UserDetails currentUser, @RequestParam("file") MultipartFile multipartFile,
-			RedirectAttributes attributes)
-			throws IOException {
+			RedirectAttributes attributes) throws IOException {
 
 		Post originalPost = postrepository.findById(id);
 		if (currentUser != null && currentUser.getUsername().equals(originalPost.getUserName())) {
@@ -218,7 +215,7 @@ public class DefaultController {
 
 			if (!multipartFile.isEmpty()) {
 				deleteFile(originalPost.getPath());
-				originalPost.setPath("/images/"+createFile(multipartFile, "src/main/resources/static/images/" ));
+				originalPost.setPath("/images/" + createFile(multipartFile, "src/main/resources/static/images/"));
 			}
 
 			originalPost.setBody(post.getBody());
@@ -227,7 +224,7 @@ public class DefaultController {
 			originalPost.setLastUpdateTime((new Date()));
 			postrepository.save(originalPost);
 			attributes.addFlashAttribute("successChange", "successChange");
-			
+
 			return HOME;
 		} else {
 			return "redirect:/error";
@@ -251,9 +248,10 @@ public class DefaultController {
 
 		return HOME;
 	}
-	
+
 	@RequestMapping(value = "deletePost/{id}", method = RequestMethod.POST, produces = "application/json")
-	public @ResponseBody Long deletePost2(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails currentUser) {
+	public @ResponseBody Long deletePost2(@PathVariable("id") Long id,
+			@AuthenticationPrincipal UserDetails currentUser) {
 		Post post = postrepository.findById(id);
 
 		if (currentUser == null || !currentUser.getUsername().equals(post.getUserName())) {
@@ -270,10 +268,11 @@ public class DefaultController {
 	}
 
 	@RequestMapping(value = "/registration", method = RequestMethod.GET)
-	public String registration(Model model,  @AuthenticationPrincipal UserDetails currentUser) {
+	public String registration(Model model, @AuthenticationPrincipal UserDetails currentUser) {
 		model.addAttribute("userForm", new User());
 		model.addAttribute("classActiveRegistration", "active");
-		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
+		if (currentUser != null)
+			model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		return "registration";
 	}
 
@@ -295,28 +294,33 @@ public class DefaultController {
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
 	public String login(Model model, String error, String logout, @AuthenticationPrincipal UserDetails currentUser) {
-		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
+		if (currentUser != null)
+			model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		model.addAttribute("classActiveLogin", "active");
-		
+
 		return "login";
 	}
-	
+
 	@RequestMapping(value = "/profile/{username}", method = RequestMethod.GET)
-	public String openProfile(@PathVariable("username") String userName, Model model, @AuthenticationPrincipal UserDetails currentUser) {
+	public String openProfile(@PathVariable("username") String userName, Model model,
+			@AuthenticationPrincipal UserDetails currentUser) {
 		User user = userService.findByUsername(userName);
 		if (user == null) {
 			return "/error";
 		}
 		List<Post> posts = postrepository.findByUserNameOrderByLastUpdateTimeDesc(userName);
-		if (currentUser != null) model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
+		if (currentUser != null)
+			model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 		model.addAttribute("user", user);
-		model.addAttribute("posts", posts);		
+		model.addAttribute("posts", posts);
 		model.addAttribute("classActiveProfile", "active");
 		return "/profile";
 	}
-	
+
 	@RequestMapping(value = "/profile/{username}", method = RequestMethod.POST, produces = "application/json")
-	public @ResponseBody User changeProfile(@PathVariable("username") String userName, @RequestParam("about") String about, @RequestParam("email") String email, Model model, @AuthenticationPrincipal UserDetails currentUser) {
+	public @ResponseBody User changeProfile(@PathVariable("username") String userName,
+			@RequestParam("about") String about, @RequestParam("email") String email, Model model,
+			@AuthenticationPrincipal UserDetails currentUser) {
 		User user = userService.findByUsername(userName);
 		if (user == null || currentUser == null || !user.getUsername().equals(currentUser.getUsername())) {
 			return null;
@@ -324,121 +328,111 @@ public class DefaultController {
 		if (!about.isEmpty()) {
 			user.setAbout(about);
 		}
-		
-		
+
 		if (!email.isEmpty()) {
 			user.setEmail(email);
 		}
 		userService.addDetails(user);
-		
+
 		return user;
 	}
-	
+
 	@RequestMapping(value = "/profileavatar/{username}", method = RequestMethod.POST)
-	public  String changeAvatar(@PathVariable("username") String userName,  @AuthenticationPrincipal UserDetails currentUser, @RequestParam("file") MultipartFile multipartFile,
+	public String changeAvatar(@PathVariable("username") String userName,
+			@AuthenticationPrincipal UserDetails currentUser, @RequestParam("file") MultipartFile multipartFile,
 			RedirectAttributes attributes) throws IOException {
 		User user = userService.findByUsername(userName);
-		if (user == null || currentUser == null || !user.getUsername().equals(currentUser.getUsername()) || multipartFile.isEmpty()) {
+		if (user == null || currentUser == null || !user.getUsername().equals(currentUser.getUsername())
+				|| multipartFile.isEmpty()) {
 			return "/error";
 		}
 		String originalAvatarPath = user.getAvatar();
-		user.setAvatar("/images/users/"+createFile(multipartFile, "src/main/resources/static/images/users/"));
+		user.setAvatar("/images/users/" + createFile(multipartFile, "src/main/resources/static/images/users/"));
 		userService.addDetails(user);
 		deleteFile(originalAvatarPath);
 		attributes.addFlashAttribute("successAvatar", "successAvatar");
-		return "redirect:/profile/"+userName;
+		return "redirect:/profile/" + userName;
 	}
-	
-	
-	@RequestMapping(value = "/upVote/{postId}", method = RequestMethod.POST,  produces = "application/json")
-	public  @ResponseBody Post upVote(@PathVariable("postId") Long postId,  @AuthenticationPrincipal UserDetails currentUser, @RequestParam("userName") String username,
-			RedirectAttributes attributes)  {
+
+	@RequestMapping(value = "/upVote/{postId}", method = RequestMethod.POST, produces = "application/json")
+	public @ResponseBody Post upVote(@PathVariable("postId") Long postId,
+			@AuthenticationPrincipal UserDetails currentUser, @RequestParam("userName") String username,
+			RedirectAttributes attributes) {
 		Post post = postrepository.findById(postId);
 		if (currentUser == null || !currentUser.getUsername().equals(username) || post == null) {
 			return null;
 		}
 		Rating rating = ratingrepository.findByUserNameAndPostId(username, postId);
-		
+
 		if (rating == null) {
 			Rating newRating = new Rating();
 			newRating.setPostId(postId);
 			newRating.setUserName(username);
 			newRating.setRate(1);
 			ratingrepository.save(newRating);
-			post.setRating(post.getRating()+1);
+			post.setRating(post.getRating() + 1);
 		}
-		
+
 		else {
 			if (rating.getRate() == 0) {
 				rating.setRate(1);
-				post.setRating(post.getRating()+1);
-			}
-			else if (rating.getRate() == 1) {
+				post.setRating(post.getRating() + 1);
+			} else if (rating.getRate() == 1) {
 				rating.setRate(0);
-				post.setRating(post.getRating()-1);
+				post.setRating(post.getRating() - 1);
 			}
-			// -1 
+			// -1
 			else {
 				rating.setRate(0);
-				post.setRating(post.getRating()+1);
-				
+				post.setRating(post.getRating() + 1);
+
 			}
 			ratingrepository.save(rating);
 		}
 		postrepository.save(post);
-		
+
 		return post;
 	}
-	
-	
-	@RequestMapping(value = "/downVote/{postId}", method = RequestMethod.POST,  produces = "application/json")
-	public  @ResponseBody Post downVote(@PathVariable("postId") Long postId,  @AuthenticationPrincipal UserDetails currentUser, @RequestParam("userName") String username,
-			RedirectAttributes attributes)  {
+
+	@RequestMapping(value = "/downVote/{postId}", method = RequestMethod.POST, produces = "application/json")
+	public @ResponseBody Post downVote(@PathVariable("postId") Long postId,
+			@AuthenticationPrincipal UserDetails currentUser, @RequestParam("userName") String username,
+			RedirectAttributes attributes) {
 		Post post = postrepository.findById(postId);
 		if (currentUser == null || !currentUser.getUsername().equals(username) || post == null) {
 			return null;
 		}
 		Rating rating = ratingrepository.findByUserNameAndPostId(username, postId);
-		
+
 		if (rating == null) {
 			Rating newRating = new Rating();
 			newRating.setPostId(postId);
 			newRating.setUserName(username);
 			newRating.setRate(-1);
 			ratingrepository.save(newRating);
-			post.setRating(post.getRating()-1);
+			post.setRating(post.getRating() - 1);
 		}
-		
+
 		else {
 			if (rating.getRate() == 0) {
 				rating.setRate(-1);
-				post.setRating(post.getRating()-1);
-			}
-			else if (rating.getRate() == 1) {
+				post.setRating(post.getRating() - 1);
+			} else if (rating.getRate() == 1) {
 				rating.setRate(0);
-				post.setRating(post.getRating()-1);
+				post.setRating(post.getRating() - 1);
 			}
-			// -1 
+			// -1
 			else {
 				rating.setRate(0);
-				post.setRating(post.getRating()+1);
-				
+				post.setRating(post.getRating() + 1);
+
 			}
 			ratingrepository.save(rating);
 		}
 		postrepository.save(post);
-		
+
 		return post;
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 	public String createFile(MultipartFile multipartFile, String source) throws IOException {
 		File convFile;
@@ -455,7 +449,7 @@ public class DefaultController {
 		fos.write(multipartFile.getBytes());
 		fos.close();
 
-		return  path;
+		return path;
 	}
 
 	public void deleteFile(String path) {

@@ -1,7 +1,6 @@
-package com.blogproject.comment;
+package com.blogproject.entities;
 
 import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,35 +9,45 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 
 @Entity
-@Table(name ="comment")
-public class Comment {
+@Table(name = "post")
+public class Post {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
+	@Column(name = "userId")
+	private Long userId;
+
 	@Column(name = "userName")
 	private String userName;
-	
-	@Column(name = "body", columnDefinition="text", length=10485760)
+
+	@Column(name = "title")
+	@NotEmpty
+	@NotBlank
+	private String title;
+
+	@Column(name = "body", columnDefinition = "text", length = 10485760)
 	@NotEmpty
 	@NotBlank
 	private String body;
-	
+
+	@Column(name = "path")
+	private String path;
+
+	@Column(name = "rating")
+	private Integer rating = 0;
+
 	@Column(name = "date")
 	private String date;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="LAST_UPDATE_TIME")
+	@Column(name = "LAST_UPDATE_TIME")
 	private Date lastUpdateTime;
-	
-	@Column(name = "postId")
-	private Long postId;
 
 	public Long getId() {
 		return id;
@@ -48,12 +57,20 @@ public class Comment {
 		this.id = id;
 	}
 
-	public String getUserName() {
-		return userName;
+	public Long getUserId() {
+		return userId;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	public String getBody() {
@@ -72,6 +89,30 @@ public class Comment {
 		this.date = date;
 	}
 
+	public String getPath() {
+		return path;
+	}
+
+	public void setPath(String path) {
+		this.path = path;
+	}
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	public Integer getRating() {
+		return rating;
+	}
+
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
+
 	public Date getLastUpdateTime() {
 		return lastUpdateTime;
 	}
@@ -80,29 +121,21 @@ public class Comment {
 		this.lastUpdateTime = lastUpdateTime;
 	}
 
-	public Long getPostId() {
-		return postId;
+	public Post() {
+		super();
 	}
 
-	public void setPostId(Long postId) {
-		this.postId = postId;
-	}
-
-	public Comment(Long id, String userName, String body, String date, Date lastUpdateTime, Long postId) {
+	public Post(Long id, Long userId, String userName, String title, String body, String path, String date,
+			Date lastUpdateTime) {
 		super();
 		this.id = id;
+		this.userId = userId;
 		this.userName = userName;
+		this.title = title;
 		this.body = body;
+		this.path = path;
 		this.date = date;
 		this.lastUpdateTime = lastUpdateTime;
-		this.postId = postId;
 	}
-
-	public Comment() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
-	
-	
 
 }

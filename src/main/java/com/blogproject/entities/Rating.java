@@ -1,4 +1,5 @@
-package com.blogproject.rating;
+package com.blogproject.entities;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -12,14 +13,14 @@ public class Rating {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
 	@Column(name = "postId")
 	private Long postId;
-	
+
 	@Column(name = "userName")
 	private String userName;
-	
-	@Column(name ="rate")
+
+	@Column(name = "rate")
 	private Integer rate;
 
 	public Long getId() {
@@ -65,8 +66,5 @@ public class Rating {
 	public Rating() {
 		super();
 	}
-	
-	
-	
 
 }
