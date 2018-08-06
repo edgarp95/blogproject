@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-
+import org.springframework.web.util.HtmlUtils;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,14 +106,17 @@ public class DefaultController {
 			@AuthenticationPrincipal UserDetails currentUser, Model model,
 			@RequestParam("file") MultipartFile multipartFile) throws IOException {
 
+	
+		
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("classActiveAddPost", "active");
+			model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 			return "/addpost";
 		}
 
 		// cover image
 		if (!multipartFile.isEmpty()) {
-			log.info("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEIIIIIIIIIIIII");
+
 			post.setPath("/images/" + createFile(multipartFile, "src/main/resources/static/images/"));
 		} else {
 			post.setPath("/images/no_image.jpg");
@@ -124,6 +127,8 @@ public class DefaultController {
 		post.setUserId(user.getId());
 		post.setUserName(user.getUsername());
 		post.setLastUpdateTime((new Date()));
+		post.setTitle(HtmlUtils.htmlEscape(post.getTitle()));
+		post.setBody(HtmlUtils.htmlEscape(post.getBody()));
 		postrepository.save(post);
 
 		return HOME;
@@ -179,6 +184,7 @@ public class DefaultController {
 		comment.setDate(LocalDateTime.now().format(formatter));
 		comment.setUserName(user.getUsername());
 		comment.setLastUpdateTime((new Date()));
+		comment.setBody(HtmlUtils.htmlEscape(comment.getBody()));
 		commentrepository.save(comment);
 
 		attributes.addFlashAttribute("commentSuccess", "commentSuccess");
@@ -205,11 +211,12 @@ public class DefaultController {
 	@PostMapping(value = "changePost/{id}")
 	public String changePost(@PathVariable("id") Long id, @Valid Post post, BindingResult bindingResult,
 			@AuthenticationPrincipal UserDetails currentUser, @RequestParam("file") MultipartFile multipartFile,
-			RedirectAttributes attributes) throws IOException {
+			RedirectAttributes attributes, Model model) throws IOException {
 
 		Post originalPost = postrepository.findById(id);
 		if (currentUser != null && currentUser.getUsername().equals(originalPost.getUserName())) {
 			if (bindingResult.hasErrors()) {
+				model.addAttribute("loggedUser", userService.findByUsername(currentUser.getUsername()));
 				return "/changepost";
 			}
 
@@ -218,8 +225,8 @@ public class DefaultController {
 				originalPost.setPath("/images/" + createFile(multipartFile, "src/main/resources/static/images/"));
 			}
 
-			originalPost.setBody(post.getBody());
-			originalPost.setTitle(post.getTitle());
+			originalPost.setBody(HtmlUtils.htmlEscape(post.getBody()));
+			originalPost.setTitle(HtmlUtils.htmlEscape(post.getTitle()));
 			originalPost.setDate(LocalDateTime.now().format(formatter));
 			originalPost.setLastUpdateTime((new Date()));
 			postrepository.save(originalPost);
@@ -326,11 +333,11 @@ public class DefaultController {
 			return null;
 		}
 		if (!about.isEmpty()) {
-			user.setAbout(about);
+			user.setAbout(HtmlUtils.htmlEscape(about));
 		}
 
 		if (!email.isEmpty()) {
-			user.setEmail(email);
+			user.setEmail(HtmlUtils.htmlEscape(email));
 		}
 		userService.addDetails(user);
 

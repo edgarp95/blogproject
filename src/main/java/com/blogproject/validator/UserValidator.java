@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
+import org.springframework.web.util.HtmlUtils;
 
 import com.blogproject.entities.User;
 import com.blogproject.service.UserService;
@@ -38,6 +39,10 @@ public class UserValidator implements Validator {
 
 		if (!user.getPasswordConfirm().equals(user.getPassword())) {
 			errors.rejectValue("passwordConfirm", "Diff.userForm.passwordConfirm");
+		}
+		
+		if (!user.getUsername().equals(HtmlUtils.htmlEscape(user.getUsername()))) {
+			errors.rejectValue("username", "Username.xss");
 		}
 	}
 }

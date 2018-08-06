@@ -21,7 +21,7 @@
 
 	<div class="container">
 		<div class="starter-template">
-			<form th:action="@{/changePost/}+${post.id}" method="post" th:object="${post}"  enctype="multipart/form-data">
+			<form th:action="@{/changePost/}+${post.id}" method="post" th:object="${post}"  enctype="multipart/form-data" >
 				<div class="modal-body mx-3">
 
 					<div class="md-form mb-5">
@@ -51,7 +51,7 @@
 						<textarea rows="4" cols="50" name="comment"
 							class="form-control validate" th:placeholder="${post.body}" th:field="*{body}"></textarea>
 						<label data-error="wrong" data-success="right" for="form29">Insert new cover (optional)</label>	
-						<input type="file"  name="file" />
+						<input type="file"  name="file" accept="image/*"  />
 					</div>
 
 
